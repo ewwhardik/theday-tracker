@@ -1,3 +1,5 @@
+TheDay is a 100% free, minimalist daily habit tracker designed to help you build habits, stay consistent, and win every day. Track recurring tasks, monitor your daily progress, and maintain your streaks with zero ads or subscriptions.
+
 🚀 Getting Started
 Just install the daily_tasks.html and continue using the app in your browser
 
