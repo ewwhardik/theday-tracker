@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TheDay — by Hardik × poop.org.in</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --border: rgba(255,255,255,0.07);
+    --accent: #7c6ff7;
+    --accent2: #5dd4a8;
+    --danger: #e24b4a;
+    --text: #f0eeff;
+    --text2: #9896b0;
+    --text3: #5c5a72;
+    --done-bg: rgba(93,212,168,0.08);
+    --done-border: rgba(93,212,168,0.2);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Header ── */
+  .header {
+    padding: 28px 24px 0;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .greeting {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .date-label {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .streak-badge {
+    background: rgba(124,111,247,0.15);
+    border: 1px solid rgba(124,111,247,0.3);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  /* ── Progress ── */
+  .progress-wrap {
+    max-width: 480px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label { font-size: 12px; color: var(--text2); }
+  .progress-count { font-size: 13px; font-weight: 600; color: var(--text); }
+  .progress-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── Tasks list ── */
+  .tasks-wrap {
+    max-width: 480px;
+    margin: 20px auto 0;
+    padding: 0 24px 100px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+  }
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .task-item:active { transform: scale(0.98); }
+  .task-item.done {
+    background: var(--done-bg);
+    border-color: var(--done-border);
+  }
+  .task-item.done .task-name { text-decoration: line-through; color: var(--text3); }
+  .task-item.done .task-sub  { color: var(--text3); }
+
+  .checkbox {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--text3);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+  .task-item.done .checkbox { background: var(--accent2); border-color: var(--accent2); }
+  .checkbox svg { opacity: 0; transform: scale(0.5); transition: all 0.2s cubic-bezier(.4,0,.2,1); }
+  .task-item.done .checkbox svg { opacity: 1; transform: scale(1); }
+
+  .task-info { flex: 1; min-width: 0; }
+  .task-name {
+    font-size: 15px; font-weight: 500; color: var(--text);
+    transition: color 0.2s ease;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .task-sub { font-size: 12px; color: var(--text2); margin-top: 2px; transition: color 0.2s ease; }
+  .task-icon { font-size: 20px; flex-shrink: 0; opacity: 0.85; }
+
+  .done-section { margin-top: 24px; }
+  .done-section .section-label { color: var(--accent2); }
+
+  .reset-btn {
+    display: block;
+    margin: 0 auto;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text2); }
+
+  /* ── Completion banner ── */
+  .complete-banner {
+    background: linear-gradient(135deg, rgba(93,212,168,0.12), rgba(124,111,247,0.12));
+    border: 1px solid rgba(93,212,168,0.25);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .complete-banner.show { display: block; animation: popIn 0.4s cubic-bezier(.4,0,.2,1); }
+  .complete-banner .emoji { font-size: 32px; margin-bottom: 6px; }
+  .complete-banner .title { font-size: 17px; font-weight: 700; color: var(--accent2); }
+  .complete-banner .sub   { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── Nav bar ── */
+  .nav-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(15,15,19,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 10px 0 env(safe-area-inset-bottom, 8px);
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.2s;
+    padding: 4px 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-item.active { opacity: 1; color: var(--accent); }
+  .nav-item svg {
+    width: 22px; height: 22px;
+    stroke: currentColor; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .nav-item span { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+
+  /* ── Panels ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+  }
+  .stat-val { font-size: 30px; font-weight: 700; color: var(--text); letter-spacing: -1px; }
+  .stat-val.green  { color: var(--accent2); }
+  .stat-val.purple { color: var(--accent); }
+  .stat-lbl { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  .history-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .history-row .date { color: var(--text2); }
+  .history-row .pct  { font-weight: 600; color: var(--accent2); }
+
+  .week-bars {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    height: 80px;
+    margin: 20px 0;
+  }
+  .week-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .week-bar {
+    width: 100%;
+    border-radius: 4px;
+    background: rgba(124,111,247,0.2);
+    transition: height 0.5s cubic-bezier(.4,0,.2,1);
+    min-height: 4px;
+  }
+  .week-bar.today { background: linear-gradient(180deg, var(--accent), var(--accent2)); }
+  .week-day-lbl { font-size: 10px; color: var(--text3); font-weight: 500; }
+
+  /* ── Manage ── */
+  .add-form { display: flex; gap: 10px; margin-bottom: 20px; }
+  .add-form input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .add-form input:focus { border-color: var(--accent); }
+  .add-form input::placeholder { color: var(--text3); }
+  .add-form button {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .manage-task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+  }
+  .manage-task .task-name { flex: 1; font-size: 14px; color: var(--text); }
+  .manage-task .task-icon { font-size: 18px; }
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .del-btn:hover { color: var(--danger); background: rgba(226,75,74,0.1); }
+  .del-btn svg {
+    width: 16px; height: 16px;
+    stroke: currentColor; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* ── About panel ── */
+  .about-hero {
+    text-align: center;
+    padding: 32px 0 24px;
+  }
+  .about-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 24px rgba(124,111,247,0.35);
+  }
+  .about-app-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .about-tagline {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 6px;
+  }
+  .about-version {
+    display: inline-block;
+    background: rgba(124,111,247,0.15);
+    border: 1px solid rgba(124,111,247,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-top: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .about-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .about-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .about-row:last-child { border-bottom: none; }
+  .about-row-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .about-row-icon.purple { background: rgba(124,111,247,0.15); }
+  .about-row-icon.teal   { background: rgba(93,212,168,0.15); }
+  .about-row-icon.orange { background: rgba(251,146,60,0.15); }
+  .about-row-body { flex: 1; min-width: 0; }
+  .about-row-label { font-size: 12px; color: var(--text3); margin-bottom: 2px; }
+  .about-row-value { font-size: 14px; font-weight: 500; color: var(--text); }
+  .about-row a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .about-row a:hover { text-decoration: underline; }
+  .ext-icon {
+    width: 13px; height: 13px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+
+  .free-badge {
+    background: rgba(93,212,168,0.12);
+    border: 1px solid rgba(93,212,168,0.25);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .free-badge-icon { font-size: 28px; flex-shrink: 0; }
+  .free-badge-title { font-size: 14px; font-weight: 600; color: var(--accent2); }
+  .free-badge-sub   { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+
+  .copyright-box {
+    background: rgba(226,75,74,0.07);
+    border: 1px solid rgba(226,75,74,0.18);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .copyright-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .copyright-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .copyright-text strong { color: var(--danger); }
+
+  .about-footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text3);
+    padding: 12px 0 4px;
+    line-height: 1.7;
+  }
+  .about-footer a { color: var(--text3); text-decoration: underline; }
+  .about-footer a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ════════════ TODAY PANEL ════════════ -->
+<div id="panel-today" class="panel active">
+  <div class="header">
+    <p class="greeting">Today's tasks</p>
+    <div class="header-top">
+      <p class="date-label" id="date-label">Monday</p>
+      <div class="streak-badge">🔥 <span id="streak-num">0</span> day streak</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span class="progress-label">Daily progress</span>
+      <span class="progress-count"><span id="done-count">0</span> / <span id="total-count">0</span> done</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="tasks-wrap">
+    <div id="complete-banner" class="complete-banner">
+      <div class="emoji">🎯</div>
+      <div class="title">All done for today!</div>
+      <div class="sub">Crushed it. See you tomorrow.</div>
+    </div>
+
+    <p class="section-label">To do</p>
+    <div id="todo-list"></div>
+
+    <div class="done-section" id="done-section" style="display:none">
+      <p class="section-label">✓ Completed</p>
+      <div id="done-list"></div>
+    </div>
+
+    <br>
+    <button class="reset-btn" onclick="resetDay()">Reset today</button>
+  </div>
+</div>
+
+<!-- ════════════ STATS PANEL ════════════ -->
+<div id="panel-stats" class="panel">
+  <div class="header">
+    <p class="greeting">Your progress</p>
+    <p class="date-label">Stats</p>
+  </div>
+  <div class="tasks-wrap">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val green" id="stat-streak">0</div>
+        <div class="stat-lbl">Day streak 🔥</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val purple" id="stat-best">0</div>
+        <div class="stat-lbl">Best streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total">0</div>
+        <div class="stat-lbl">Days tracked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val green" id="stat-pct">0%</div>
+        <div class="stat-lbl">Avg completion</div>
+      </div>
+    </div>
+
+    <p class="section-label" style="margin-bottom:12px">This week</p>
+    <div class="week-bars" id="week-bars"></div>
+
+    <p class="section-label" style="margin-bottom:4px">Recent history</p>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<!-- ════════════ MANAGE PANEL ════════════ -->
+<div id="panel-manage" class="panel">
+  <div class="header">
+    <p class="greeting">Manage</p>
+    <p class="date-label">Tasks</p>
+  </div>
+  <div class="tasks-wrap">
+    <div class="add-form">
+      <input type="text" id="new-task-input" placeholder="Add a new task..." maxlength="60">
+      <button onclick="addTask()">Add</button>
+    </div>
+    <p class="section-label">Your tasks</p>
+    <div id="manage-list"></div>
+  </div>
+</div>
+
+<!-- ════════════ ABOUT PANEL ════════════ -->
+<div id="panel-about" class="panel">
+  <div class="header">
+    <p class="greeting">About this app</p>
+    <p class="date-label">Info</p>
+  </div>
+  <div class="tasks-wrap">
+
+    <div class="about-hero">
+      <div class="about-logo">✅</div>
+      <div class="about-app-name">TheDay</div>
+      <div class="about-tagline">Build habits. Stay consistent. Win every day.</div>
+      <div class="about-version">v1.0.1 — Free Forever</div>
+    </div>
+
+    <div class="free-badge">
+      <div class="free-badge-icon">🎁</div>
+      <div>
+        <div class="free-badge-title">100% Free App</div>
+        <div class="free-badge-sub">No ads. No subscriptions. No hidden fees. Built for everyone.</div>
+      </div>
+    </div>
+
+    <div class="copyright-box">
+      <div class="copyright-icon">⚠️</div>
+      <div class="copyright-text">
+        <strong>Using without credit is prohibited.</strong> This app is free to use, but redistribution, rebranding, or publishing without proper attribution to the original developer and organization is not allowed.
+      </div>
+    </div>
+
+    <p class="section-label" style="margin-bottom:10px">Credits</p>
+    <div class="about-card">
+      <div class="about-row">
+        <div class="about-row-icon purple">👨‍💻</div>
+        <div class="about-row-body">
+          <div class="about-row-label">Developer</div>
+          <div class="about-row-value">Hardik</div>
+        </div>
+      </div>
+      <div class="about-row">
+        <div class="about-row-icon teal">🏢</div>
+        <div class="about-row-body">
+          <div class="about-row-label">Produced by</div>
+          <div class="about-row-value">poop Organization India</div>
+        </div>
+      </div>
+      <div class="about-row">
+        <div class="about-row-icon orange">🌐</div>
+        <div class="about-row-body">
+          <div class="about-row-label">Website</div>
+          <a href="https://poop.org.in" target="_blank" rel="noopener noreferrer">
+            poop.org.in
+            <svg class="ext-icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-label" style="margin-bottom:10px">Features</p>
+    <div class="about-card">
+      <div class="about-row">
+        <div class="about-row-icon purple">📋</div>
+        <div class="about-row-body">
+          <div class="about-row-label">Daily checklist</div>
+          <div class="about-row-value">Track recurring habits every day</div>
+        </div>
+      </div>
+      <div class="about-row">
+        <div class="about-row-icon teal">🔥</div>
+        <div class="about-row-body">
+          <div class="about-row-label">Streak tracking</div>
+          <div class="about-row-value">Stay motivated with daily streaks</div>
+        </div>
+      </div>
+      <div class="about-row">
+        <div class="about-row-icon orange">📊</div>
+        <div class="about-row-body">
+          <div class="about-row-label">Weekly stats</div>
+          <div class="about-row-value">See your progress at a glance</div>
+        </div>
+      </div>
+      <div class="about-row">
+        <div class="about-row-icon purple">💾</div>
+        <div class="about-row-body">
+          <div class="about-row-label">Offline & private</div>
+          <div class="about-row-value">All data stays on your device</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-footer">
+      Made with ❤️ in India<br>
+      © 2026 <a href="https://poop.org.in" target="_blank" rel="noopener noreferrer">poop Organization India</a> — Dev: Hardik<br>
+      All rights reserved. Free to use. Credit required.
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ BOTTOM NAV ════════════ -->
+<div class="nav-bar">
+  <div class="nav-item active" id="nav-today" onclick="switchPanel('today')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Today</span>
+  </div>
+  <div class="nav-item" id="nav-stats" onclick="switchPanel('stats')">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Stats</span>
+  </div>
+  <div class="nav-item" id="nav-manage" onclick="switchPanel('manage')">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span>Manage</span>
+  </div>
+  <div class="nav-item" id="nav-about" onclick="switchPanel('about')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <span>About</span>
+  </div>
+</div>
+
+<script>
+const DEFAULT_TASKS = [
+  { id: 1, name: "Take Vitamins",        icon: "💊", sub: "Stay consistent" },
+  { id: 2, name: "Take Protein",         icon: "💪", sub: "Fuel your gains" },
+  { id: 3, name: "Work on a Skill",      icon: "🧠", sub: "Level up every day" },
+  { id: 4, name: "Prepare for Future",   icon: "🚀", sub: "Plan & execute" },
+  { id: 5, name: "No Fap",               icon: "🔒", sub: "Stay disciplined" },
+  { id: 6, name: "ewwhardik, poop.org & Future Tools", icon: "💻", sub: "Build your projects" },
+];
+
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.warn('Storage full:', e); }
+}
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+let tasks   = load('dt_tasks',   DEFAULT_TASKS);
+let history = load('dt_history', {});
+let streak  = load('dt_streak',  { count: 0, best: 0, last: '' });
+
+const today = todayKey();
+if (!history[today]) history[today] = {};
+
+// Auto-reset: if the last key isn't today, start fresh state (history preserved)
+function getState() { return history[today] || {}; }
+
+function saveAll() {
+  save('dt_tasks',   tasks);
+  save('dt_history', history);
+  save('dt_streak',  streak);
+}
+
+function toggleTask(id) {
+  if (!history[today]) history[today] = {};
+  history[today][id] = !history[today][id];
+  checkStreak();
+  saveAll();
+  renderToday();
+}
+
+function checkStreak() {
+  const s = getState();
+  const allDone = tasks.length > 0 && tasks.every(t => s[t.id]);
+  if (allDone && streak.last !== today) {
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    const yKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+    streak.count = (streak.last === yKey) ? streak.count + 1 : 1;
+    streak.best  = Math.max(streak.best, streak.count);
+    streak.last  = today;
+  }
+}
+
+function resetDay() {
+  if (!confirm('Reset all tasks for today?')) return;
+  history[today] = {};
+  saveAll();
+  renderToday();
+}
+
+function renderToday() {
+  const s = getState();
+  const done  = tasks.filter(t => s[t.id]);
+  const todo  = tasks.filter(t => !s[t.id]);
+  const total = tasks.length;
+  const doneN = done.length;
+  const pct   = total ? Math.round(doneN / total * 100) : 0;
+
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('done-count').textContent    = doneN;
+  document.getElementById('total-count').textContent   = total;
+  document.getElementById('streak-num').textContent    = streak.count;
+
+  const now    = new Date();
+  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('date-label').textContent =
+    `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+
+  const banner = document.getElementById('complete-banner');
+  if (doneN === total && total > 0) banner.classList.add('show');
+  else banner.classList.remove('show');
+
+  function makeItem(t, isDone) {
+    const div = document.createElement('div');
+    div.className = 'task-item' + (isDone ? ' done' : '');
+    div.onclick   = () => toggleTask(t.id);
+    div.innerHTML = `
+      <div class="checkbox">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <polyline points="2,7 5,10 11,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="task-info">
+        <div class="task-name">${t.name}</div>
+        <div class="task-sub">${t.sub || ''}</div>
+      </div>
+      <div class="task-icon">${t.icon}</div>`;
+    return div;
+  }
+
+  const todoList = document.getElementById('todo-list');
+  const doneList = document.getElementById('done-list');
+  todoList.innerHTML = '';
+  doneList.innerHTML = '';
+
+  todo.forEach(t => todoList.appendChild(makeItem(t, false)));
+  done.forEach(t => doneList.appendChild(makeItem(t, true)));
+
+  document.getElementById('done-section').style.display = done.length ? 'block' : 'none';
+}
+
+function renderStats() {
+  document.getElementById('stat-streak').textContent = streak.count;
+  document.getElementById('stat-best').textContent   = streak.best;
+
+  const days = Object.keys(history);
+  document.getElementById('stat-total').textContent  = days.length;
+
+  const avgs = days.map(d => {
+    const s = history[d];
+    const n = tasks.filter(t => s[t.id]).length;
+    return tasks.length ? n / tasks.length : 0;
+  });
+  const avg = avgs.length ? Math.round(avgs.reduce((a, b) => a + b, 0) / avgs.length * 100) : 0;
+  document.getElementById('stat-pct').textContent = avg + '%';
+
+  // Week bars
+  const weekBars  = document.getElementById('week-bars');
+  weekBars.innerHTML = '';
+  const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const s = history[k] || {};
+    const n = tasks.filter(t => s[t.id]).length;
+    const p = tasks.length ? n / tasks.length : 0;
+    const isToday = k === today;
+    const lbl = dayLabels[d.getDay() === 0 ? 6 : d.getDay() - 1];
+
+    const wrap = document.createElement('div'); wrap.className = 'week-bar-wrap';
+    const bar  = document.createElement('div'); bar.className  = 'week-bar' + (isToday ? ' today' : '');
+    bar.style.height = Math.max(p * 68, 4) + 'px';
+    const lblEl = document.createElement('div'); lblEl.className = 'week-day-lbl'; lblEl.textContent = lbl;
+    wrap.appendChild(bar); wrap.appendChild(lblEl);
+    weekBars.appendChild(wrap);
+  }
+
+  // History list
+  const histEl = document.getElementById('history-list');
+  histEl.innerHTML = '';
+  const sorted = [...days].sort((a, b) => b.localeCompare(a)).slice(0, 14);
+  sorted.forEach(d => {
+    const s = history[d];
+    const n = tasks.filter(t => s[t.id]).length;
+    const p = tasks.length ? Math.round(n / tasks.length * 100) : 0;
+    const row = document.createElement('div');
+    row.className = 'history-row';
+    row.innerHTML = `<span class="date">${d}</span><span>${n}/${tasks.length} tasks</span><span class="pct">${p}%</span>`;
+    histEl.appendChild(row);
+  });
+}
+
+function renderManage() {
+  const list = document.getElementById('manage-list');
+  list.innerHTML = '';
+  tasks.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'manage-task';
+    div.innerHTML = `
+      <div class="task-icon">${t.icon}</div>
+      <div class="task-name">${t.name}</div>
+      <button class="del-btn" onclick="deleteTask(${t.id})" title="Delete task">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>`;
+    list.appendChild(div);
+  });
+}
+
+function addTask() {
+  const input = document.getElementById('new-task-input');
+  const name  = input.value.trim();
+  if (!name) return;
+  const icons = ['✅','⭐','🎯','📌','🔑','💡','🛠️','📚','🏃','🧩'];
+  const id    = Date.now();
+  tasks.push({ id, name, icon: icons[tasks.length % icons.length], sub: 'Daily habit' });
+  input.value = '';
+  saveAll();
+  renderManage();
+  renderToday();
+}
+
+function deleteTask(id) {
+  if (!confirm('Delete this task?')) return;
+  tasks = tasks.filter(t => t.id !== id);
+  saveAll();
+  renderManage();
+  renderToday();
+}
+
+document.getElementById('new-task-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+
+function switchPanel(name) {
+  ['today','stats','manage','about'].forEach(p => {
+    document.getElementById(`panel-${p}`).classList.toggle('active', p === name);
+    document.getElementById(`nav-${p}`).classList.toggle('active', p === name);
+  });
+  if (name === 'stats')  renderStats();
+  if (name === 'manage') renderManage();
+}
+
+renderToday();
+</script>
+</body>
+</html>
